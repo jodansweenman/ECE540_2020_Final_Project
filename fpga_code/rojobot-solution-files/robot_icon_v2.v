@@ -170,7 +170,7 @@ module robot_icon_v2 #(
     endcase
     
     // pixel color
-    icon = 12'h001;
+    icon = 12'h000;
     if (     robot_x < 0
           || robot_y < 0
           || frame_row*SPRITE_ROWS + robot_y >= MEM_ROWS

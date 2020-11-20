@@ -9,7 +9,7 @@ module robot_icon_v2 #(
     
     //NEW 11/20 - No longer animating
     //parameter ANIMATION_COUNTDOWN = 8_000_000,
-    
+
     parameter SPRITE_COLS = 34,
     parameter SPRITE_ROWS = 34,
     
@@ -67,7 +67,7 @@ module robot_icon_v2 #(
   
   // init the ram
   ram_block #(
-    .INIT_FILE("pikachu_02.mem")
+    .INIT_FILE("Tank-Sprite.mem")
   )ram_pikachu(
     .read_addr(read_addr),
     .clk(clk),

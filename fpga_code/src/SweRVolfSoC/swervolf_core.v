@@ -266,50 +266,6 @@ module swervolf_core
      (// Wishbone slave interface
       .clk_i  (clk),
       .rst_i  (wb_rst),
-      /* Note! Below is a horrible hack that needs some explanation
-
-       The AXI bus is 64-bit and there is no support for telling the slave
-       that it just wants to read a part of a 64-bit word.
-
-       On the slave side, the SPI controller has an 8-bit databus.
-       So in order to ensure that only one register gets accessed by the 64-bit
-       master, the registers are placed 64 bits apart from each other, at
-       addresses 0x0, 0x8, 0x10, 0x18 and 0x20 instead of the original 0x0, 0x1,
-       0x2, 0x3 and 0x4. This works easy enough by just cutting of the three
-       least significant bits of the address before passing it to the slave.
-
-       Now, to complicate things, there is an wb2axi bridge that converts 64-bit
-       datapath into 32 bits between the master and slave. Since the master
-       can't indicate what part of the 64-bit word it actually wants to read,
-       every 64-bit read gets turned into two consecutive 32-bit reads on the
-       wishbone side.
-
-       E.g. a read from address 0x8 on the 64-bit AXI side gets turned into two
-       read operations from 0x8 and 0xc on the 32-bit Wishbone side.
-
-       Usually this is not a real problem. Just a bit inefficient. But in this
-       case we have the SPDR register that holds the incoming data. When we
-       read a byte from that register, it is removed from the SPI FIFO and
-       can't be read again. Now, if we read from this register two times, every
-       time we just want to read a byte, this means that we throw away half of
-       our received data and things break down.
-
-       Writes are no problem since, there is a byte mask that tells which
-       bytes to really write
-
-       In order to work around this issue, we look at bit 2. Why? Because a
-       64-bit read to any of the mapped registers (which are 64-bit aligned)
-       will get turned into two read operations. First, one against the actual
-       register, and then an additional read from address+4, i.e. address, but
-       with bit 2 set as well. We still need to respond to the second read but
-       it doesn't matter what data it contains since no one should look at it.
-
-       So, when we see a read with bit 2 set, we redirect this access to
-       register zero. Doesn't really matter which register as long as we pick
-       a non-volatile one.
-
-       TODO: Make something sensible here instead
-       */
       .adr_i  (wb_m2s_spi_flash_adr[2] ? 3'd0 : wb_m2s_spi_flash_adr[5:3]),
       .dat_i  (wb_m2s_spi_flash_dat[7:0]),
       .we_i   (wb_m2s_spi_flash_we),
@@ -530,50 +486,6 @@ gpio_top gpio2_module(
      (// Wishbone slave interface
       .clk_i  (clk),
       .rst_i  (wb_rst),
-      /* Note! Below is a horrible hack that needs some explanation
-
-       The AXI bus is 64-bit and there is no support for telling the slave
-       that it just wants to read a part of a 64-bit word.
-
-       On the slave side, the SPI controller has an 8-bit databus.
-       So in order to ensure that only one register gets accessed by the 64-bit
-       master, the registers are placed 64 bits apart from each other, at
-       addresses 0x0, 0x8, 0x10, 0x18 and 0x20 instead of the original 0x0, 0x1,
-       0x2, 0x3 and 0x4. This works easy enough by just cutting of the three
-       least significant bits of the address before passing it to the slave.
-
-       Now, to complicate things, there is an wb2axi bridge that converts 64-bit
-       datapath into 32 bits between the master and slave. Since the master
-       can't indicate what part of the 64-bit word it actually wants to read,
-       every 64-bit read gets turned into two consecutive 32-bit reads on the
-       wishbone side.
-
-       E.g. a read from address 0x8 on the 64-bit AXI side gets turned into two
-       read operations from 0x8 and 0xc on the 32-bit Wishbone side.
-
-       Usually this is not a real problem. Just a bit inefficient. But in this
-       case we have the SPDR register that holds the incoming data. When we
-       read a byte from that register, it is removed from the SPI FIFO and
-       can't be read again. Now, if we read from this register two times, every
-       time we just want to read a byte, this means that we throw away half of
-       our received data and things break down.
-
-       Writes are no problem since, there is a byte mask that tells which
-       bytes to really write
-
-       In order to work around this issue, we look at bit 2. Why? Because a
-       64-bit read to any of the mapped registers (which are 64-bit aligned)
-       will get turned into two read operations. First, one against the actual
-       register, and then an additional read from address+4, i.e. address, but
-       with bit 2 set as well. We still need to respond to the second read but
-       it doesn't matter what data it contains since no one should look at it.
-
-       So, when we see a read with bit 2 set, we redirect this access to
-       register zero. Doesn't really matter which register as long as we pick
-       a non-volatile one.
-
-       TODO: Make something sensible here instead
-       */
       .adr_i  (wb_m2s_spi_accel_adr[2] ? 3'd0 : wb_m2s_spi_accel_adr[5:3]),
       .dat_i  (wb_m2s_spi_accel_dat[7:0]),
       .we_i   (wb_m2s_spi_accel_we),
@@ -869,6 +781,19 @@ rojobot_controller rojobot_control(
 	.wb_ack_o(wb_s2m_bot_ack), 
 	.wb_err_o(wb_s2m_bot_err), 
 	.wb_rtry_o(wb_s2m_bot_rty),
+	
+	.wb_adr_i_2(wb_m2s_bot2_adr), 
+	.wb_dat_i_2(wb_m2s_bot2_dat), 
+	.wb_sel_i_2(wb_m2s_bot2_sel), 
+	.wb_we_i_2(wb_m2s_bot2_we), 
+	.wb_cyc_i_2(wb_m2s_bot2_cyc), 
+	.wb_stb_i_(wb_m2s_bot2_stb),
+	.wb_cti_i_2(wb_m2s_bot2_cti), 
+	.wb_bte_i_2(wb_m2s_bot2_bte),
+	.wb_dat_o_2(wb_s2m_bot2_dat), 
+	.wb_ack_o_2(wb_s2m_bot2_ack), 
+	.wb_err_o_2(wb_s2m_bot2_err), 
+	.wb_rtry_o_2(wb_s2m_bot2_rty),
 	
 	// VGA signals
     .pixel_column(pixel_column),    // screen column

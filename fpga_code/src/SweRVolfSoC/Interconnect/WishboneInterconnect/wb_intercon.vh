@@ -143,6 +143,20 @@ wire        wb_s2m_bot_ack;
 wire        wb_s2m_bot_err;
 wire        wb_s2m_bot_rty;
 
+// Rojobot 2
+wire [31:0] wb_m2s_bot2_adr;
+wire [31:0] wb_m2s_bot2_dat;
+wire  [3:0] wb_m2s_bot2_sel;
+wire        wb_m2s_bot2_we;
+wire        wb_m2s_bot2_cyc;
+wire        wb_m2s_bot2_stb;
+wire  [2:0] wb_m2s_bot2_cti;
+wire  [1:0] wb_m2s_bot2_bte;
+wire [31:0] wb_s2m_bot2_dat;
+wire        wb_s2m_bot2_ack;
+wire        wb_s2m_bot2_err;
+wire        wb_s2m_bot2_rty;
+
 wb_intercon wb_intercon0
    (.wb_clk_i           (wb_clk),
     .wb_rst_i           (wb_rst),
@@ -285,7 +299,20 @@ wb_intercon wb_intercon0
     .wb_bot_dat_i      (wb_s2m_bot_dat),
     .wb_bot_ack_i      (wb_s2m_bot_ack),
     .wb_bot_err_i      (wb_s2m_bot_err),
-    .wb_bot_rty_i      (wb_s2m_bot_rty)    
+    .wb_bot_rty_i      (wb_s2m_bot_rty),
     
+ // Rojobot 2
+    .wb_bot2_adr_o      (wb_m2s_bot2_adr),
+    .wb_bot2_dat_o      (wb_m2s_bot2_dat),
+    .wb_bot2_sel_o      (wb_m2s_bot2_sel),
+    .wb_bot2_we_o       (wb_m2s_bot2_we),
+    .wb_bot2_cyc_o      (wb_m2s_bot2_cyc),
+    .wb_bot2_stb_o      (wb_m2s_bot2_stb),
+    .wb_bot2_cti_o      (wb_m2s_bot2_cti),
+    .wb_bot2_bte_o      (wb_m2s_bot2_bte),
+    .wb_bot2_dat_i      (wb_s2m_bot2_dat),
+    .wb_bot2_ack_i      (wb_s2m_bot2_ack),
+    .wb_bot2_err_i      (wb_s2m_bot2_err),
+    .wb_bot2_rty_i      (wb_s2m_bot2_rty)       
 );
 

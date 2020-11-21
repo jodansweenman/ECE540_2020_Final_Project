@@ -8,8 +8,8 @@ module robot_icon_v2 #(
     parameter MARGIN = 128,
     
     //NEW 11/20 - No longer animating
-    //parameter ANIMATION_COUNTDOWN = 8_000_000,
-    
+    parameter ANIMATION_COUNTDOWN = 8_000_000,
+
     parameter SPRITE_COLS = 34,
     parameter SPRITE_ROWS = 34,
     
@@ -55,7 +55,7 @@ module robot_icon_v2 #(
   
   // NEW 11/20 - No longer using animation
   // control direction to move the frame column: -1 or 1
-  //reg signed [31:0] frame_direction;
+  reg signed [31:0] frame_direction;
   
   // RAM
   wire [31:0] read_addr;
@@ -67,7 +67,7 @@ module robot_icon_v2 #(
   
   // init the ram
   ram_block #(
-    .INIT_FILE("pikachu_02.mem")
+    .INIT_FILE("Tank-Sprite.mem")
   )ram_pikachu(
     .read_addr(read_addr),
     .clk(clk),
@@ -92,7 +92,7 @@ module robot_icon_v2 #(
   
   
   // NEW 11/20 - No longer using animations
-  /*
+  
   // --------------------------------------------------
   // counter for next frame column: next frame if timeup, change direction if column 0 or 2
   // --------------------------------------------------
@@ -127,7 +127,7 @@ module robot_icon_v2 #(
       frame_col <= 1;
     end
   end
-  */
+  
   
   // --------------------------------------------------
   // determine pixel color

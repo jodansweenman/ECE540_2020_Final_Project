@@ -1,0 +1,6 @@
+attempt 1-
+Correct orientiation but NOPE on height:
+Orientation order = S N W E SW ?SE? NW ?NE? (in this order then copy 3x which goes to row 27744... then replace all "001" with "000" <- transparent color)
+
+attempt 2 - (worked but squished...)
+Orientation order = S -> N -> W -> E -> SW -> ?SE? -> NW -> ?NE? (34x102 image and in the listed order, should go to 27744... then replace all "001" with "000" <- transparent color)

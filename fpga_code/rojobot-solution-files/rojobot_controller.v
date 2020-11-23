@@ -1,6 +1,6 @@
 `timescale 1ns / 1ps
 //////////////////////////////////////////////////////////////////////////////////
-// Company: 
+
 // Engineer: Thong Doan
 // 
 // Create Date: 10/02/2020 08:21:59 PM
@@ -74,12 +74,11 @@ module rojobot_controller(
     reg [15:0] debounced_SW_75;         // the switches in 75 domain
     /////////// Rojobot 1/////////////
     // for WISHBONE bus
-    reg [7:0]   WB_H_BOT_CTRL;          // bot control sent from software
-    reg         WB_H_INT_ACK;           // int ack sent from software
-    wire        WB_H_BOT_UPDATE_SYNC;   // bot update sync syngal sent from Rojobot
-    wire [31:0] WB_H_BOT_INFO;          // bot info sent from Rojobot
-    wire        req_we;                 // write enable
-    wire [7:0]  WB_HADDR;               // used for offseting, extracted from wishbone-address-bus 
+	// WB          
+    wire [31:0]  IO_BotInfo;           
+    reg [7:0]    IO_BotCtrl;	           
+    assign IO_BotInfo = {LocX_reg_100, LocY_reg_100, Sensors_reg_100, BotInfo_reg_100};
+    assign MotCtl_in = IO_BotCtrl;
     
     // Rojobot
     wire [7:0]  MotCtl_in;
@@ -94,19 +93,18 @@ module rojobot_controller(
     reg  [7:0]  BotInfo_reg_100;        // sync to 100MHz domain
     wire        upd_sysregs;
     reg         upd_sysregs_100;        // sync to 100MHz domain
-    wire [11:0] icon;
+    wire [11:0] icon1;
+    wire        icon1_flag;
     
     // Handshake flip-flop
-    reg         H_BOT_UPDATE_SYNC;
-    wire        IO_INT_ACK;
+	reg          IO_BotUpdt_Sync;       
+	reg          IO_INT_ACK;  
     //////////// Rojobot 2 /////////////
     // for WISHBONE bus
-    reg [7:0]   WB_H_BOT_CTRL_2;          // bot control sent from software
-    reg         WB_H_INT_ACK_2;           // int ack sent from software
-    wire        WB_H_BOT_UPDATE_SYNC_2;   // bot update sync syngal sent from Rojobot
-    wire [31:0] WB_H_BOT_INFO_2;          // bot info sent from Rojobot
-    wire        req_we_2;                 // write enable
-    wire [7:0]  WB_HADDR_2;               // used for offseting, extracted from wishbone-address-bus 
+    wire [31:0]  IO_BotInfo_2;           
+    reg [7:0]    IO_BotCtrl_2;	           
+    assign IO_BotInfo_2 = {LocX_reg_100_2, LocY_reg_100_2, Sensors_reg_100_2, BotInfo_reg_100_2};
+    assign MotCtl_in_2 = IO_BotCtrl_2;
     
     // Rojobot
     wire [7:0]  MotCtl_in_2;
@@ -121,22 +119,19 @@ module rojobot_controller(
     reg  [7:0]  BotInfo_reg_100_2;        // sync to 100MHz domain
     wire        upd_sysregs_2;
     reg         upd_sysregs_100_2;        // sync to 100MHz domain
-    wire [11:0] icon_2;
+    wire [11:0] icon2;
+    wire        icon2_flag;
     
     // Handshake flip-flop
-    reg         H_BOT_UPDATE_SYNC_2;
-    wire        IO_INT_ACK_2;
+	reg          IO_BotUpdt_Sync_2;       
+	reg          IO_INT_ACK_2;  
     //////////////////////////////////////////////////////////////////
     // World map
-    wire [13:0] worldmap_addr;
-    wire [1:0]  worldmap_data, worldmap_data_part_1, worldmap_data_lr, worldmap_data_loop;
+    wire [13:0] worldmap_addr, worldmap_addr2;
+    wire [1:0]  worldmap_data, worldmap_data2;
     wire [13:0] vid_addr;
-    wire [1:0]  world_pixel, world_pixel_part_1, world_pixel_lr, world_pixel_loop;
-    wire [11:0] map_color;
-    
-    // Title
-    wire [11:0] title_color;
-    
+    wire [1:0]  world_pixel;
+  
     // Scaler
     wire [6:0]  world_row, world_column;
     wire        out_of_map;
@@ -161,14 +156,14 @@ module rojobot_controller(
     );
     
     // rojobot 2
-    rojobot31_0 Thomas (
+    rojobot31_1 Train (
         .MotCtl_in(MotCtl_in_75_2),         // input wire [7 : 0] MotCtl_in
         .LocX_reg(LocX_reg_2),              // output wire [7 : 0] LocX_reg
         .LocY_reg(LocY_reg_2),              // output wire [7 : 0] LocY_reg
         .Sensors_reg(Sensors_reg_2),        // output wire [7 : 0] Sensors_reg
         .BotInfo_reg(BotInfo_reg_2),        // output wire [7 : 0] BotInfo_reg
-        .worldmap_addr(worldmap_addr_2),    // output wire [13 : 0] worldmap_addr
-        .worldmap_data(worldmap_data_2),    // input wire [1 : 0] worldmap_data
+        .worldmap_addr(worldmap_addr2),    // output wire [13 : 0] worldmap_addr
+        .worldmap_data(worldmap_data2),    // input wire [1 : 0] worldmap_data
         .clk_in(clk_75),                  // input wire clk_in
         .reset(~rstn_75),                 // input wire reset
         .upd_sysregs(upd_sysregs_2),        // output wire upd_sysregs
@@ -178,21 +173,21 @@ module rojobot_controller(
     // handshake flip-flop
     always @ (posedge clk) begin
         if (IO_INT_ACK == 1'b1) begin
-            H_BOT_UPDATE_SYNC <= 1'b0;
+            IO_BotUpdt_Sync <= 1'b0;
         end else if (upd_sysregs_100 == 1'b1) begin
-            H_BOT_UPDATE_SYNC <= 1'b1;
+            IO_BotUpdt_Sync <= 1'b1;
         end else begin
-            H_BOT_UPDATE_SYNC <= H_BOT_UPDATE_SYNC;
+            IO_BotUpdt_Sync <= IO_BotUpdt_Sync;
         end
     end
     
     always @ (posedge clk) begin
         if (IO_INT_ACK_2 == 1'b1) begin
-            H_BOT_UPDATE_SYNC_2 <= 1'b0;
+            IO_BotUpdt_Sync_2 <= 1'b0;
         end else if (upd_sysregs_100_2 == 1'b1) begin
-            H_BOT_UPDATE_SYNC_2 <= 1'b1;
+            IO_BotUpdt_Sync_2 <= 1'b1;
         end else begin
-            H_BOT_UPDATE_SYNC_2 <= H_BOT_UPDATE_SYNC_2;
+            IO_BotUpdt_Sync_2 <= IO_BotUpdt_Sync_2;
         end
     end
     
@@ -203,6 +198,15 @@ module rojobot_controller(
         .clkb(clk_75),
         .addrb(vid_addr),
         .doutb(world_pixel)
+    );
+    
+    blk_mem_gen_0 game_map2(
+        .clka(clk_75),
+        .addra(worldmap_addr2),
+        .douta(worldmap_data2),
+        .clkb(clk_75),
+        .addrb(vid_addr),
+        .doutb()
     );
     // world map part 1
     /*world_map world_map(
@@ -251,7 +255,7 @@ module rojobot_controller(
     );
     
     // rojobot ICON  
-    robot_icon_v2 robot_icon_v2(
+    icon(
         .clk(clk_75),
         .reset(~rstn_75),
         .pixel_row(pixel_row),
@@ -259,22 +263,37 @@ module rojobot_controller(
         .LocX_reg(LocX_reg),
         .LocY_reg(LocY_reg),
         .BotInfo_reg(BotInfo_reg),
-        .icon(icon)
+        .icon(icon1)
+        //.icon_flag(icon1_flag)
     );
     
+    icon2(
+        .clk(clk_75),
+        .reset(~rstn_75),
+        .pixel_row(pixel_row),
+        .pixel_column(pixel_column),
+        .LocX_reg(LocX_reg_2),
+        .LocY_reg(LocY_reg_2),
+        .BotInfo_reg(BotInfo_reg_2),
+        .icon(icon2)
+        //.icon_flag(icon2_flag)
+    );
+
     // map colorizer
-    map_colorizer map_colorizer(
+    /*map_colorizer map_colorizer(
         .pixel_row(pixel_row),
         .pixel_column(pixel_column),
         .map_value(world_pixel),
         .map_color(map_color)
-    );
+    );*/
 
     // colorizer
     colorizer_v2 colorizer_v2(
-        .icon(icon),
-        .map_color(map_color),
-        //.title_color(title_color),
+        .icon1(icon1),
+        //.icon1_flag(icon1_flag),
+        .icon2(icon2),
+        //.icon2_flag(icon2_flag),
+        .world_pixel(world_pixel),
         .video_on(video_on),
         .VGA_R(VGA_R),
         .VGA_G(VGA_G),
@@ -306,24 +325,7 @@ module rojobot_controller(
         BotInfo_reg_100_2 <= BotInfo_reg_2;
         upd_sysregs_100_2 <= upd_sysregs_2;
     end
-    
-    // connect WISBHONE data & robot data
-    assign WB_H_BOT_INFO = {LocX_reg_100, LocY_reg_100, Sensors_reg_100, BotInfo_reg_100};
-    assign WB_H_BOT_UPDATE_SYNC = H_BOT_UPDATE_SYNC;
-    assign MotCtl_in = WB_H_BOT_CTRL;
-    assign IO_INT_ACK = WB_H_INT_ACK;
-    
-    assign WB_H_BOT_INFO_2 = {LocX_reg_100_2, LocY_reg_100_2, Sensors_reg_100_2, BotInfo_reg_100_2};
-    assign WB_H_BOT_UPDATE_SYNC_2 = H_BOT_UPDATE_SYNC_2;
-    assign MotCtl_in_2 = WB_H_BOT_CTRL_2;
-    assign IO_INT_ACK_2 = WB_H_INT_ACK_2;
-    
-    // determine write enable, extract address offset
-    assign req_we = &{wb_cyc_i, wb_stb_i, wb_we_i, !wb_ack_o};
-    assign WB_HADDR = wb_adr_i[7:0];
-    
-    assign req_we_2 = &{wb_cyc_i_2, wb_stb_i_2, wb_we_i_2, !wb_ack_o_2};
-    assign WB_HADDR_2 = wb_adr_i_2[7:0];
+       
     
     // WISHBONE acknowledge
     always @(posedge clk, negedge rstn) begin
@@ -336,64 +338,59 @@ module rojobot_controller(
             wb_ack_o_2 <= wb_cyc_i_2 & !wb_ack_o_2;
         end
     end
-    
-    // write data via WISHBONE bus
-    always @(posedge clk, negedge rstn) begin
-    
-        // reset
-        if (~rstn) begin
-            WB_H_INT_ACK  <= 1'b0;
-            WB_H_BOT_CTRL  <= 8'h00;
-            WB_H_INT_ACK_2  <= 1'b0;
-            WB_H_BOT_CTRL_2  <= 8'h00;
-        end
-        else if (req_we & wb_sel_i[0]) begin
-            case (WB_HADDR)
-                // bot control
-                8'h10: WB_H_BOT_CTRL <= wb_dat_i[7:0];
-            
-                // int ack
-                8'h18: WB_H_INT_ACK  <= wb_dat_i[0];
-            endcase
-        end
-        else if (req_we_2 & wb_sel_i_2[0]) begin
-            case (WB_HADDR_2)
-                // bot control
-                8'h10: WB_H_BOT_CTRL_2 <= wb_dat_i_2[7:0];
-            
-                // int ack
-                8'h18: WB_H_INT_ACK_2  <= wb_dat_i_2[0];
-            endcase
-        end
+
+    //Write Control Rojobot 1
+    always @(posedge clk, negedge rstn) begin            
+        if (~rstn) begin           
+            IO_INT_ACK  <= 1'b0;            
+            IO_BotCtrl  <= 8'h00;        
+        end        
+        else if ( wb_cyc_i & wb_stb_i & wb_we_i & !wb_ack_o & wb_sel_i[0]) begin // Possibly wb_ck_o instead.            
+            case (wb_adr_i[7:0])                
+                8'h10: IO_BotCtrl <= wb_dat_i[7:0]; //bot control
+                8'h18: IO_INT_ACK  <= wb_dat_i[0];  // int ack          
+            endcase        
+        end    
+    end
+    //Write Control Rojobot 2
+    always @(posedge clk, negedge rstn) begin            
+        if (~rstn) begin           
+            IO_INT_ACK_2  <= 1'b0;            
+            IO_BotCtrl_2  <= 8'h00;        
+        end        
+        else if ( wb_cyc_i_2 & wb_stb_i_2 & wb_we_i_2 & !wb_ack_o_2 & wb_sel_i_2[0]) begin // Possibly wb_ck_o instead.            
+            case (wb_adr_i_2[7:0])                
+                8'h10: IO_BotCtrl_2 <= wb_dat_i_2[7:0]; //bot control
+                8'h18: IO_INT_ACK_2  <= wb_dat_i_2[0];  // int ack          
+            endcase        
+        end    
     end
     
     // read data via WISHBONE bus
-    always @ (posedge clk, negedge rstn) begin
-        if (~rstn) begin
-            wb_dat_o <= 32'h00_00_00_00;
-        end
-        else begin
-            case (WB_HADDR)
-                // bot info
-                8'h0C: wb_dat_o <= WB_H_BOT_INFO;
-                // update sync
-                8'h14: wb_dat_o <= {31'h00_00_00_00, WB_H_BOT_UPDATE_SYNC};       
-            endcase
-        end
+    //Read Control Rojobot 1
+    always @ (posedge clk, negedge rstn) begin        
+        if (~rstn) begin           
+            wb_dat_o <= 32'h00_00_00_00;        
+        end        
+        else begin            
+            case (wb_adr_i[7:0])                
+                8'h0C: wb_dat_o <= IO_BotInfo; // bot info                       
+                8'h14: wb_dat_o <= {31'h00_00_00_00, IO_BotUpdt_Sync}; // update sync 
+            endcase        
+        end    
     end
     
-   always @ (posedge clk, negedge rstn) begin
-        if (~rstn) begin
-            wb_dat_o_2 <= 32'h00_00_00_00;
-        end
-        else begin
-            case (WB_HADDR_2)
-                // bot info
-                8'h0C: wb_dat_o_2 <= WB_H_BOT_INFO_@;
-                // update sync
-                8'h14: wb_dat_o_2 <= {31'h00_00_00_00, WB_H_BOT_UPDATE_SYNC_2};       
-            endcase
-        end
+    //Read Control Rojobot 2
+    always @ (posedge clk, negedge rstn) begin        
+        if (~rstn) begin           
+            wb_dat_o_2 <= 32'h00_00_00_00;        
+        end        
+        else begin            
+            case (wb_adr_i_2[7:0])                
+                8'h0C: wb_dat_o_2 <= IO_BotInfo_2; // bot info                       
+                8'h14: wb_dat_o_2 <= {31'h00_00_00_00, IO_BotUpdt_Sync_2}; // update sync 
+            endcase        
+        end    
     end
-    
+   
 endmodule

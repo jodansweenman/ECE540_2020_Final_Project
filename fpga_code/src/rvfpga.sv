@@ -50,10 +50,9 @@ module rvfpga
     inout wire [4:0]   i_pb,
     output reg [7:0]   AN,
     output reg         CA, CB, CC, CD, CE, CF, CG, DP,
-    output wire        o_accel_cs_n,
-    output wire        o_accel_mosi,
-    input wire         i_accel_miso,
-    output wire        accel_sclk,
+    input wire         PS2_CLK,
+    input wire         PS2_DATA,
+    //output wire        UART_TXD,
     
     // VGA
     output wire [3:0]   VGA_R, VGA_G, VGA_B,
@@ -93,6 +92,29 @@ module rvfpga
    assign cpu.r_user = 1'b0;
    assign mem.b_user = 1'b0;
    assign mem.r_user = 1'b0;
+  
+   wire clk_75;
+
+   clk_wiz_0 clock_divider
+   (
+       .clk_75(clk_75),     // output clk_75
+       .clk_50(clk_50),
+       .reset(rst_core), // input reset
+       .clk_in1(clk)); 
+         
+   reg clk_50;   
+   wire [15:0] keycode;
+    
+   always @(posedge clk)begin
+        clk_50 <= ~clk_50;
+   end
+   
+   PS2Receiver keyboard (
+    .clk(clk_50),
+    .kclk(PS2_CLK),
+    .kdata(PS2_DATA),
+    .keycodeout(keycode)
+   );
 
    axi_cdc_intf
      #(.AXI_USER_WIDTH (1),
@@ -264,14 +286,9 @@ module rvfpga
       .i_ram_init_error (litedram_init_error),
       .i_gpio           ({32'd0,i_sw,16'd0}),
       .o_gpio           ({48'd0,gpio_out}),
-      .i_gpio2          (i_pb),
+      .i_gpio2          ({48'd0,keycode}),
       .AN (AN),
       .Digits_Bits ({DP, CA,CB,CC,CD,CE,CF,CG}),
-      .o_accel_sclk   (accel_sclk),
-      .o_accel_cs_n   (o_accel_cs_n),
-      .o_accel_mosi   (o_accel_mosi),
-      .i_accel_miso   (i_accel_miso),
-      
       // VGA
       .clk_75,
       .VGA_R,
@@ -287,19 +304,6 @@ module rvfpga
    end
 
    assign o_uart_tx = 1'b0 ? litedram_tx : cpu_tx;
-
-    // **************************************************
-    // Clock divider
-    // **************************************************
-    wire clk_75;
-    
-    clk_wiz_0 clock_divider
-       (
-        // Clock out ports
-        .clk_75(clk_75),     // output clk_75
-        // Status and control signals
-        .reset(rst_core), // input reset
-       // Clock in ports
-        .clk_in1(clk));   
+ 
 
 endmodule

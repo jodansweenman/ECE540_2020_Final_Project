@@ -82,15 +82,9 @@ module swervolf_core
     inout wire [63:0]  i_gpio,
     output wire [63:0] o_gpio,
 
-    inout wire [4:0]  i_gpio2,
-
+    inout wire [63:0]  i_gpio2,
     output wire [ 7          :0] AN,
     output wire [ 7          :0] Digits_Bits,
-
-    output wire        o_accel_sclk,
-    output wire        o_accel_cs_n,
-    output wire        o_accel_mosi,
-    input wire         i_accel_miso,
     
     // VGA
     input wire clk_75,
@@ -261,7 +255,7 @@ module swervolf_core
 
    wire [7:0] 		       spi_rdt;
    assign wb_s2m_spi_flash_dat = {24'd0,spi_rdt};
-
+/*
    simple_spi spi
      (// Wishbone slave interface
       .clk_i  (clk),
@@ -307,7 +301,7 @@ module swervolf_core
       .cts_pad_i (1'b0),
       .dsr_pad_i (1'b0),
       .ri_pad_i  (1'b0),
-      .dcd_pad_i (1'b0));
+      .dcd_pad_i (1'b0));*/
 
 
    // GPIO - Leds and Switches
@@ -354,7 +348,7 @@ module swervolf_core
 
    assign io_data[31:16] = i_gpio[31:16];
 
-   // GPIO 2 - Pushbuttons
+   // GPIO 2 - KEYBOARD
    wire [31:0] en_gpio2;
    wire        gpio2_irq;
    wire [31:0] i_gpio2_temp;
@@ -366,17 +360,17 @@ module swervolf_core
    bidirec gpio2_2  (.oe(en_gpio2[2] ), .inp(o_gpio2_temp[2] ), .outp(i_gpio2_temp[2] ), .bidir(io2_data[2] ));
    bidirec gpio2_3  (.oe(en_gpio2[3] ), .inp(o_gpio2_temp[3] ), .outp(i_gpio2_temp[3] ), .bidir(io2_data[3] ));
    bidirec gpio2_4  (.oe(en_gpio2[4] ), .inp(o_gpio2_temp[4] ), .outp(i_gpio2_temp[4] ), .bidir(io2_data[4] ));
-//   bidirec gpio2_5  (.oe(en_gpio2[5] ), .inp(o_gpio2_temp[5] ), .outp(i_gpio2_temp[5] ), .bidir(io2_data[5] ));
-//   bidirec gpio2_6  (.oe(en_gpio2[6] ), .inp(o_gpio2_temp[6] ), .outp(i_gpio2_temp[6] ), .bidir(io2_data[6] ));
-//   bidirec gpio2_7  (.oe(en_gpio2[7] ), .inp(o_gpio2_temp[7] ), .outp(i_gpio2_temp[7] ), .bidir(io2_data[7] ));
-//   bidirec gpio2_8  (.oe(en_gpio2[8] ), .inp(o_gpio2_temp[8] ), .outp(i_gpio2_temp[8] ), .bidir(io2_data[8] ));
-//   bidirec gpio2_9  (.oe(en_gpio2[9] ), .inp(o_gpio2_temp[9] ), .outp(i_gpio2_temp[9] ), .bidir(io2_data[9] ));
-//   bidirec gpio2_10 (.oe(en_gpio2[10]), .inp(o_gpio2_temp[10]), .outp(i_gpio2_temp[10]), .bidir(io2_data[10]));
-//   bidirec gpio2_11 (.oe(en_gpio2[11]), .inp(o_gpio2_temp[11]), .outp(i_gpio2_temp[11]), .bidir(io2_data[11]));
-//   bidirec gpio2_12 (.oe(en_gpio2[12]), .inp(o_gpio2_temp[12]), .outp(i_gpio2_temp[12]), .bidir(io2_data[12]));
-//   bidirec gpio2_13 (.oe(en_gpio2[13]), .inp(o_gpio2_temp[13]), .outp(i_gpio2_temp[13]), .bidir(io2_data[13]));
-//   bidirec gpio2_14 (.oe(en_gpio2[14]), .inp(o_gpio2_temp[14]), .outp(i_gpio2_temp[14]), .bidir(io2_data[14]));
-//   bidirec gpio2_15 (.oe(en_gpio2[15]), .inp(o_gpio2_temp[15]), .outp(i_gpio2_temp[15]), .bidir(io2_data[15]));
+   bidirec gpio2_5  (.oe(en_gpio2[5] ), .inp(o_gpio2_temp[5] ), .outp(i_gpio2_temp[5] ), .bidir(io2_data[5] ));
+   bidirec gpio2_6  (.oe(en_gpio2[6] ), .inp(o_gpio2_temp[6] ), .outp(i_gpio2_temp[6] ), .bidir(io2_data[6] ));
+   bidirec gpio2_7  (.oe(en_gpio2[7] ), .inp(o_gpio2_temp[7] ), .outp(i_gpio2_temp[7] ), .bidir(io2_data[7] ));
+   bidirec gpio2_8  (.oe(en_gpio2[8] ), .inp(o_gpio2_temp[8] ), .outp(i_gpio2_temp[8] ), .bidir(io2_data[8] ));
+   bidirec gpio2_9  (.oe(en_gpio2[9] ), .inp(o_gpio2_temp[9] ), .outp(i_gpio2_temp[9] ), .bidir(io2_data[9] ));
+   bidirec gpio2_10 (.oe(en_gpio2[10]), .inp(o_gpio2_temp[10]), .outp(i_gpio2_temp[10]), .bidir(io2_data[10]));
+   bidirec gpio2_11 (.oe(en_gpio2[11]), .inp(o_gpio2_temp[11]), .outp(i_gpio2_temp[11]), .bidir(io2_data[11]));
+   bidirec gpio2_12 (.oe(en_gpio2[12]), .inp(o_gpio2_temp[12]), .outp(i_gpio2_temp[12]), .bidir(io2_data[12]));
+   bidirec gpio2_13 (.oe(en_gpio2[13]), .inp(o_gpio2_temp[13]), .outp(i_gpio2_temp[13]), .bidir(io2_data[13]));
+   bidirec gpio2_14 (.oe(en_gpio2[14]), .inp(o_gpio2_temp[14]), .outp(i_gpio2_temp[14]), .bidir(io2_data[14]));
+   bidirec gpio2_15 (.oe(en_gpio2[15]), .inp(o_gpio2_temp[15]), .outp(i_gpio2_temp[15]), .bidir(io2_data[15]));
 //   bidirec gpio2_16 (.oe(en_gpio2[16]), .inp(o_gpio2_temp[16]), .outp(i_gpio2_temp[16]), .bidir(io2_data[16]));
 //   bidirec gpio2_17 (.oe(en_gpio2[17]), .inp(o_gpio2_temp[17]), .outp(i_gpio2_temp[17]), .bidir(io2_data[17]));
 //   bidirec gpio2_18 (.oe(en_gpio2[18]), .inp(o_gpio2_temp[18]), .outp(i_gpio2_temp[18]), .bidir(io2_data[18]));
@@ -396,7 +390,7 @@ module swervolf_core
 
 //   assign o_gpio2 = io2_data[15:0];
 
-   assign io2_data[4:0] = i_gpio2[4:0];
+   assign io2_data[15:0] = i_gpio[15:0];        // already debounced
 
     // Debounce    
     wire [5:0] pbtn_db;     // debounced outputs of pushbuttons	
@@ -432,7 +426,7 @@ module swervolf_core
         .ext_pad_o     (o_gpio_temp[15:0]),
         .ext_padoe_o   (en_gpio));
 
-gpio_top gpio2_module(
+    gpio_top gpio2_module(
         .wb_clk_i     (clk), 
         .wb_rst_i     (wb_rst), 
         .wb_cyc_i     (wb_m2s_gpio2_cyc), 
@@ -448,13 +442,13 @@ gpio_top gpio2_module(
 
         // External GPIO Interface
 //        .ext_pad_i     ({i_gpio_temp[31:16],16'b0}),
-        .ext_pad_i     ({pbtn_db})
+        .ext_pad_i     ({io2_data})
 //        .ext_pad_o     (o_gpio2_temp[4:0]),
 //        .ext_padoe_o   (en_gpio2)
         );
 
    // PTC
-   wire        ptc_irq;
+   /*wire        ptc_irq;
 
    ptc_top timer_ptc(
         .wb_clk_i     (clk), 
@@ -474,11 +468,11 @@ gpio_top gpio2_module(
         .capt_pad_i (),
         .pwm_pad_o (),
         .oen_padoen_o ()
-   );
+   );*/
 
 
    // SPI for the Accelerometer
-   wire [7:0]            spi2_rdt;
+   /*wire [7:0]            spi2_rdt;
    assign wb_s2m_spi_accel_dat = {24'd0,spi2_rdt};
    wire        spi2_irq;
 
@@ -493,13 +487,7 @@ gpio_top gpio2_module(
       .stb_i  (wb_m2s_spi_accel_stb),
       .dat_o  (spi2_rdt),
       .ack_o  (wb_s2m_spi_accel_ack),
-      .inta_o (spi2_irq),
-      // SPI interface
-      .sck_o  (o_accel_sclk),
-      .ss_o   (o_accel_cs_n),
-      .mosi_o (o_accel_mosi),
-      .miso_i (i_accel_miso));
-
+      .inta_o (spi2_irq));*/
 
    swerv_wrapper swerv_eh1
      (
@@ -787,7 +775,7 @@ rojobot_controller rojobot_control(
 	.wb_sel_i_2(wb_m2s_bot2_sel), 
 	.wb_we_i_2(wb_m2s_bot2_we), 
 	.wb_cyc_i_2(wb_m2s_bot2_cyc), 
-	.wb_stb_i_(wb_m2s_bot2_stb),
+	.wb_stb_i_2(wb_m2s_bot2_stb),
 	.wb_cti_i_2(wb_m2s_bot2_cti), 
 	.wb_bte_i_2(wb_m2s_bot2_bte),
 	.wb_dat_o_2(wb_s2m_bot2_dat), 

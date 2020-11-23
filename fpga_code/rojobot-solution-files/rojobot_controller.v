@@ -255,7 +255,7 @@ module rojobot_controller(
     );
     
     // rojobot ICON  
-    icon(
+    icon icon_tank(
         .clk(clk_75),
         .reset(~rstn_75),
         .pixel_row(pixel_row),
@@ -267,7 +267,7 @@ module rojobot_controller(
         //.icon_flag(icon1_flag)
     );
     
-    icon2(
+    icon icon_train(
         .clk(clk_75),
         .reset(~rstn_75),
         .pixel_row(pixel_row),

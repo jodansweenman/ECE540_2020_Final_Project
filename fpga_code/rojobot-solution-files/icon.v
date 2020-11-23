@@ -26,11 +26,8 @@ module icon #(
     input wire               clk,
     input wire               reset,
     output reg [11:0]   icon
+    //output reg          icon_flag
 );
-
-  //*** NOTE: 000 is reserved for transparent color. Use 001 to mimic "black" color
-  
-  //*** NOTE: too much delay from LocX, LocX to determine robot_x, robot_y. The reason might be due to multiplication
   
   // ==================================================
   // DECLARATIONS
@@ -177,6 +174,7 @@ module icon #(
     end
     else begin
       icon = ram_out;
+      //icon_flag = (icon==12'h000)?1'b0:1'b1;
     end
     
   end

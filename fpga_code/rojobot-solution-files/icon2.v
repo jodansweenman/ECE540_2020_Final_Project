@@ -25,7 +25,8 @@ module icon2 #(
     input wire [7:0]         BotInfo_reg,
     input wire               clk,
     input wire               reset,
-    output reg [11:0]   icon
+    output reg [11:0]    icon
+    //output reg           icon_flag
 );
 
   //*** NOTE: 000 is reserved for transparent color. Use 001 to mimic "black" color
@@ -177,6 +178,7 @@ module icon2 #(
     end
     else begin
       icon = ram_out;
+      //icon_flag = (icon==12'h000)?1'b0:1'b1;
     end
     
   end

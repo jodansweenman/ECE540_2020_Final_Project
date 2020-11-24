@@ -1,23 +1,4 @@
 `timescale 1ns / 1ps
-//////////////////////////////////////////////////////////////////////////////////
-
-// Engineer: Thong Doan
-// 
-// Create Date: 10/02/2020 08:21:59 PM
-// Design Name: 
-// Module Name: rojobot_controller
-// Project Name: 
-// Target Devices: 
-// Tool Versions: 
-// Description: 
-//      This module wraps the rojobot module and the WB interface signals
-// Dependencies: 
-// 
-// Revision:
-// Revision 0.01 - File Created
-// Additional Comments:
-// 
-//////////////////////////////////////////////////////////////////////////////////
 
 
 module rojobot_controller(
@@ -64,10 +45,6 @@ module rojobot_controller(
     output wire [ 3:0] VGA_B            // VGA blue channel
 	
     );
-    
-    // ****************************************
-    // VARIABLES
-    // ****************************************
     
     // for SYNC
     reg rstn_75;                        // reset in 75MHz domain
@@ -127,10 +104,10 @@ module rojobot_controller(
 	reg          IO_INT_ACK_2;  
     //////////////////////////////////////////////////////////////////
     // World map
-    wire [13:0] worldmap_addr, worldmap_addr2;
-    wire [1:0]  worldmap_data, worldmap_data2;
+    wire [13:0] map_addr_tank, map_addr_train;
+    wire [1:0]  map_data_tank, map_data_train, map1_data_tank, map1_data_train, map2_data_tank, map2_data_train;
     wire [13:0] vid_addr;
-    wire [1:0]  world_pixel;
+    wire [1:0]  map_pixel, map1_pixel, map2_pixel;
   
     // Scaler
     wire [6:0]  world_row, world_column;
@@ -147,8 +124,8 @@ module rojobot_controller(
         .LocY_reg(LocY_reg),              // output wire [7 : 0] LocY_reg
         .Sensors_reg(Sensors_reg),        // output wire [7 : 0] Sensors_reg
         .BotInfo_reg(BotInfo_reg),        // output wire [7 : 0] BotInfo_reg
-        .worldmap_addr(worldmap_addr),    // output wire [13 : 0] worldmap_addr
-        .worldmap_data(worldmap_data),    // input wire [1 : 0] worldmap_data
+        .worldmap_addr(map_addr_tank),    // output wire [13 : 0] worldmap_addr
+        .worldmap_data(map_data_tank),    // input wire [1 : 0] worldmap_data
         .clk_in(clk_75),                  // input wire clk_in
         .reset(~rstn_75),                 // input wire reset
         .upd_sysregs(upd_sysregs),        // output wire upd_sysregs
@@ -162,8 +139,8 @@ module rojobot_controller(
         .LocY_reg(LocY_reg_2),              // output wire [7 : 0] LocY_reg
         .Sensors_reg(Sensors_reg_2),        // output wire [7 : 0] Sensors_reg
         .BotInfo_reg(BotInfo_reg_2),        // output wire [7 : 0] BotInfo_reg
-        .worldmap_addr(worldmap_addr2),    // output wire [13 : 0] worldmap_addr
-        .worldmap_data(worldmap_data2),    // input wire [1 : 0] worldmap_data
+        .worldmap_addr(map_addr_train),    // output wire [13 : 0] worldmap_addr
+        .worldmap_data(map_data_train),    // input wire [1 : 0] worldmap_data
         .clk_in(clk_75),                  // input wire clk_in
         .reset(~rstn_75),                 // input wire reset
         .upd_sysregs(upd_sysregs_2),        // output wire upd_sysregs
@@ -191,59 +168,46 @@ module rojobot_controller(
         end
     end
     
-    blk_mem_gen_0 game_map(
+    game_map1 tank1(
         .clka(clk_75),
-        .addra(worldmap_addr),
-        .douta(worldmap_data),
+        .addra(map_addr_tank),
+        .douta(map1_data_tank),
         .clkb(clk_75),
         .addrb(vid_addr),
-        .doutb(world_pixel)
+        .doutb(map1_pixel)
     );
     
-    blk_mem_gen_0 game_map2(
+    game_map1 train1(
         .clka(clk_75),
-        .addra(worldmap_addr2),
-        .douta(worldmap_data2),
+        .addra(map_addr_train),
+        .douta(map1_data_train),
         .clkb(clk_75),
         .addrb(vid_addr),
         .doutb()
     );
-    // world map part 1
-    /*world_map world_map(
+    
+    game_map2 tank2(
         .clka(clk_75),
-        .addra(worldmap_addr),
-        .douta(worldmap_data_part_1),
+        .addra(map_addr_tank),
+        .douta(map2_data_tank),
         .clkb(clk_75),
         .addrb(vid_addr),
-        .doutb(world_pixel_part_1)
+        .doutb(map2_pixel)
     );
     
-    // world map lr
-    world_map_lr world_map_lr(
+    game_map2 train2(
         .clka(clk_75),
-        .addra(worldmap_addr),
-        .douta(worldmap_data_lr),
+        .addra(map_addr_train),
+        .douta(map2_data_train),
         .clkb(clk_75),
         .addrb(vid_addr),
-        .doutb(world_pixel_lr)
+        .doutb()
     );
-    
-    // world map loop
-    world_map_loop world_map_loop(
-        .clka(clk_75),
-        .addra(worldmap_addr),
-        .douta(worldmap_data_loop),
-        .clkb(clk_75),
-        .addrb(vid_addr),
-        .doutb(world_pixel_loop)
-    );*/
     
     // mux to select map based on the SW
-    /*assign {worldmap_data, world_pixel} =
-        debounced_SW[14] ? {worldmap_data_lr, world_pixel_lr} : (
-            debounced_SW[13] ? {worldmap_data_loop, world_pixel_loop} : {worldmap_data_part_1, world_pixel_part_1}
-        );*/
-    
+    assign {map_data_tank, map_data_train, map_pixel} =
+        debounced_SW[15] ? {map1_data_tank, map1_data_train, map1_pixel} : {map2_data_tank, map2_data_train, map2_pixel};
+
     // scaler
     vga_scaler_v2 vga_scaler_v2(
         .world_row(world_row),
@@ -293,7 +257,7 @@ module rojobot_controller(
         //.icon1_flag(icon1_flag),
         .icon2(icon2),
         //.icon2_flag(icon2_flag),
-        .world_pixel(world_pixel),
+        .world_pixel(map_pixel),
         .video_on(video_on),
         .VGA_R(VGA_R),
         .VGA_G(VGA_G),

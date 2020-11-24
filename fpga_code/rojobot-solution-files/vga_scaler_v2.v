@@ -12,10 +12,10 @@ module vga_scaler_v2
   parameter WORLD_ROWS = 128,
   localparam MARGIN = 128  
 )(
-  input      [11:0] pixel_row, pixel_column,    // input pixel coordinates
+  input  wire    [11:0] pixel_row, pixel_column,    // input pixel coordinates
   output reg [ 6:0] world_row, world_column,    // corresponding row & column with thr pixel coordinates
-  output     [13:0] vid_addr,                   // concatenation of {world row, world column}
-  output            out_of_map                  // indicate if the given pixel coordinates out-of-map (1) or not (0)
+  output wire    [13:0] vid_addr,                   // concatenation of {world row, world column}
+  output wire           out_of_map                  // indicate if the given pixel coordinates out-of-map (1) or not (0)
 );
 
   // ==================================================

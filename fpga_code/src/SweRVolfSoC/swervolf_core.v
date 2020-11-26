@@ -390,7 +390,7 @@ module swervolf_core
 
 //   assign o_gpio2 = io2_data[15:0];
 
-   assign io2_data[15:0] = i_gpio[15:0];        // already debounced
+   assign io2_data[15:0] = i_gpio2[15:0];        // already debounced
 
     // Debounce    
     wire [5:0] pbtn_db;     // debounced outputs of pushbuttons	

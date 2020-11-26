@@ -94,7 +94,8 @@ module rvfpga
    assign mem.r_user = 1'b0;
   
    wire clk_75;
-
+   wire clk_50;
+   
    clk_wiz_0 clock_divider
    (
        .clk_75(clk_75),     // output clk_75
@@ -102,12 +103,7 @@ module rvfpga
        .reset(rst_core), // input reset
        .clk_in1(clk)); 
          
-   reg clk_50;   
    wire [15:0] keycode;
-    
-   always @(posedge clk)begin
-        clk_50 <= ~clk_50;
-   end
    
    PS2Receiver keyboard (
     .clk(clk_50),

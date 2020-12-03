@@ -24,7 +24,7 @@ module colorizer_v2(
       {VGA_R, VGA_G, VGA_B} = 12'h000;
     end
     else begin
-        {VGA_R, VGA_G, VGA_B} = icon1? icon1 : map_color;
+        {VGA_R, VGA_G, VGA_B} = icon1 ? icon1 : (icon2 ? icon2 : map_color);
     end
   end
 

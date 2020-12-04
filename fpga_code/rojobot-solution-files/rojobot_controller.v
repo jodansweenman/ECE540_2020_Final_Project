@@ -264,6 +264,22 @@ module rojobot_controller(
         .VGA_B(VGA_B)
     );
     
+//    bullet bullet_tank(
+//            .pixel_row(pixel_row),
+//            .pixel_column(pixel_column),
+//            .bullet(bul2),                        //bullet flag
+//            .bul_color(bul_color2),               //12-bit bullet color (RGB code)
+//            .burst(burst_tg),                     //red tank hits green tank
+//            .LocX_reg(LocX_reg),
+//            .LocY_reg(LocY_reg),
+//            .BotInfo_reg(BotInfo_reg),
+//            .clock(clk_75),
+//            .reset(rstn_75),
+//            .biu(IO_Bullet[1]),                   //input signal to make the green tank shot
+//            .icon_op(icon),                       //opponent tank icon flag(green tank)
+//            .world_pixel(map_pixel)
+//            );
+    
     // ****************************************
     // LOGIC
     // ****************************************

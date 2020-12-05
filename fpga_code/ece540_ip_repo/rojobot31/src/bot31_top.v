@@ -26,7 +26,11 @@
 //	THE WHEEL MOVEMENT THRESHOLD AND TYPE OF MOTOR CONTROL  (ON/OFF CONTROL vs. VARIABLE SPEED).  
 //////////
 
-module rojobot31 (
+module rojobot31 #(
+	// param used to pass to b31_if different reset starting locations
+	parameter TOP_START_LOCATION_X = 0,
+	parameter TOP_START_LOCATION_Y = 0
+	)(
 	// interface to the application CPU
 	input 		[7:0]		MotCtl_in,		// Motor control input	
 	output		[7:0] 		LocX_reg,		// X-coordinate of rojobot's location		
@@ -110,7 +114,10 @@ kcpsm6 #(
 	.clk 			(clk_in));
 
 // instantiate the interface to the Application CPU
-bot31_if  BOTREGIF (
+bot31_if #(
+	.START_LOCATION_X(TOP_START_LOCATION_X),
+	.START_LOCATION_Y(TOP_START_LOCATION_Y)
+)BOTREGIF (
 	// interface to the picoblaze
 	.Wr_Strobe(write_strobe),		// Write strobe - asserted to write I/O data
 	.Rd_Strobe(read_strobe),		// Read strobe - asserted to read I/O data

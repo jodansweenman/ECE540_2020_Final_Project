@@ -50,7 +50,11 @@
 // THIS VERSION OF THE MODULE SUPPORTS THE BOT CONFIGURATION REGISTER (BOT 3.x)						
 //////////
 
-module bot31_if(
+module bot31_if #(
+	// Used for different starting locations.  Comes from bot31_top params.
+	parameter START_LOCATION_X = 0,
+	parameter START_LOCATION_Y = 0
+)(
 	// interface to the picoblaze
 	input 					Wr_Strobe,		// Write strobe - asserted to write I/O data
 							Rd_Strobe,		// Read strobe - asserted to read I/O data
@@ -128,8 +132,9 @@ end // always - read registers
 // write the internal registers with the current state of the BOT
 always @(posedge clk or posedge reset) begin
 	if (reset) begin
-		LocX_int <= 0;		
-		LocY_int <= 0;
+		// Start locations are changed by top module bot31_top
+		LocX_int <= START_LOCATION_X;		
+		LocY_int <= START_LOCATION_Y;
 		BotInfo_int <= 0;
 		Sensors_int <= 0;
 		

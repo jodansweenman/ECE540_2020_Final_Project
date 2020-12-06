@@ -129,7 +129,7 @@ module rojobot_controller(
         .clk_in(clk_75),                  // input wire clk_in
         .reset(~rstn_75),                 // input wire reset
         .upd_sysregs(upd_sysregs),        // output wire upd_sysregs
-        .Bot_Config_reg(debounced_SW_75)  // input wire [7 : 0] Bot_Config_reg
+        .Bot_Config_reg(8'b00001011)  // input wire [7 : 0] Bot_Config_reg
     );
     
     // rojobot 2
@@ -144,7 +144,7 @@ module rojobot_controller(
         .clk_in(clk_75),                  // input wire clk_in
         .reset(~rstn_75),                 // input wire reset
         .upd_sysregs(upd_sysregs_2),        // output wire upd_sysregs
-        .Bot_Config_reg(debounced_SW_75)  // input wire [7 : 0] Bot_Config_reg
+        .Bot_Config_reg(8'b00001011)  // input wire [7 : 0] Bot_Config_reg
     );
     
     // handshake flip-flop

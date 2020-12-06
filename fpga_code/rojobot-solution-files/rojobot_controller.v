@@ -1,14 +1,11 @@
 `timescale 1ns / 1ps
 
-
 module rojobot_controller(
-
     // System
     input wire         clk,            // 100MHz clock
 	input wire         rstn,           // reset active low
 	input wire         clk_75,         // 75MHz clock
 	input wire [15:0]  debounced_SW,   // the switches
-
     // WISHBONE Interface
 	input wire [31:0]  wb_adr_i, 
 	input wire [31:0]  wb_dat_i, 
@@ -34,16 +31,14 @@ module rojobot_controller(
 	output reg [31:0]  wb_dat_o_2, 
 	output reg         wb_ack_o_2, 
 	output wire        wb_err_o_2, 
-	output wire        wb_rtry_o_2,
-	
+	output wire        wb_rtry_o_2,	
 	// VGA
     input wire [11:0]  pixel_column,    // VGA screen column
     input wire [11:0]  pixel_row,       // VGA screen row
     input wire         video_on,        // VGA signal for visible region
     output wire [ 3:0] VGA_R,           // VGA red channel
     output wire [ 3:0] VGA_G,           // VGA green channel
-    output wire [ 3:0] VGA_B            // VGA blue channel
-	
+    output wire [ 3:0] VGA_B            // VGA blue channel	
     );
     
     // for SYNC
@@ -56,7 +51,7 @@ module rojobot_controller(
     reg [7:0]    IO_BotCtrl;	           
     assign IO_BotInfo = {LocX_reg_100, LocY_reg_100, Sensors_reg_100, BotInfo_reg_100};
     assign MotCtl_in = IO_BotCtrl;
-    
+      
     // Rojobot
     wire [7:0]  MotCtl_in;
     reg  [7:0]  MotCtl_in_75;           // sync to 75MHz domain
@@ -112,11 +107,20 @@ module rojobot_controller(
     // Scaler
     wire [6:0]  world_row, world_column;
     wire        out_of_map;
+  
+    wire [1:0] IO_HIT;               // 2 bit hit IO, one for each rojobot        
+    reg [3:0] IO_Frame;             // 4 bit for four frames      
+    reg [1:0] IO_Bullet;            // 2 bits bullet IO, one for each rojobot
+    wire [11:0] bullet1;
+    wire        bullet1_flag;
+    wire [11:0] bullet2;
+    wire        bullet2_flag;
+    wire train_hit, tank_hit; 
+    wire tank_reset_hit, train_reset_hit, tank_reset, train_reset; 
     
-    // ****************************************
-    // INSTANCES
-    // ****************************************
-    
+    assign   tank_reset = (tank_reset_hit)| (~rstn_75) | (IO_Frame[0])|(IO_Frame[2])|(IO_Frame[3])|(IO_Frame[4]);
+    assign   train_reset = (train_reset_hit)| (~rstn_75) | (IO_Frame[0])|(IO_Frame[2])|(IO_Frame[3])|(IO_Frame[4]);    
+
     // rojobot 1
     rojobot31_0 Tank (
         .MotCtl_in(MotCtl_in_75),         // input wire [7 : 0] MotCtl_in
@@ -127,7 +131,7 @@ module rojobot_controller(
         .worldmap_addr(map_addr_tank),    // output wire [13 : 0] worldmap_addr
         .worldmap_data(map_data_tank),    // input wire [1 : 0] worldmap_data
         .clk_in(clk_75),                  // input wire clk_in
-        .reset(~rstn_75),                 // input wire reset
+        .reset(tank_reset),                 // input wire reset
         .upd_sysregs(upd_sysregs),        // output wire upd_sysregs
         .Bot_Config_reg(8'b00001011)  // input wire [7 : 0] Bot_Config_reg
     );
@@ -142,7 +146,7 @@ module rojobot_controller(
         .worldmap_addr(map_addr_train),    // output wire [13 : 0] worldmap_addr
         .worldmap_data(map_data_train),    // input wire [1 : 0] worldmap_data
         .clk_in(clk_75),                  // input wire clk_in
-        .reset(~rstn_75),                 // input wire reset
+        .reset(train_reset),                 // input wire reset
         .upd_sysregs(upd_sysregs_2),        // output wire upd_sysregs
         .Bot_Config_reg(8'b00001011)  // input wire [7 : 0] Bot_Config_reg
     );
@@ -227,8 +231,11 @@ module rojobot_controller(
         .LocX_reg(LocX_reg),
         .LocY_reg(LocY_reg),
         .BotInfo_reg(BotInfo_reg),
-        .icon(icon1)
-        //.icon_flag(icon1_flag)
+        .icon(icon1),
+        .burst(IO_HIT[0]),
+        .icon_flag(icon1_flag),
+        .tank_hit(tank_hit),
+        .tank_reset(tank_reset_hit)
     );
     
     icon2 icon_train(
@@ -239,46 +246,70 @@ module rojobot_controller(
         .LocX_reg(LocX_reg_2),
         .LocY_reg(LocY_reg_2),
         .BotInfo_reg(BotInfo_reg_2),
-        .icon(icon2)
-        //.icon_flag(icon2_flag)
+        .icon(icon2),
+        .burst(IO_HIT[1]),
+        .icon_flag(icon2_flag),
+        .train_hit(train_hit),
+        .train_reset(train_reset_hit)
     );
 
-    // map colorizer
-    /*map_colorizer map_colorizer(
-        .pixel_row(pixel_row),
-        .pixel_column(pixel_column),
-        .map_value(world_pixel),
-        .map_color(map_color)
-    );*/
+    /*bullet tank_bullet(    
+            .pixel_row(pixel_row),
+            .pixel_column(pixel_column),
+            .bullet_flag(bullet1_flag),                             
+            .bullet_color(bullet1),  
+            .burst(train_hit),            
+            .LocX_reg(LocX_reg),       
+            .LocY_reg(LocY_reg),
+            .BotInfo_reg(BotInfo_reg),
+            .clk(clk_75),
+            .reset(~rstn_75),
+            .biu(IO_Bullet[0]),                 //input signal to make the green tank shot
+            .icon_op(icon1),                    //opponent tank icon flag(red tank)
+            .world_pixel(doutb)
+     );
+     
+     bullet train_bullet(    
+            .pixel_row(pixel_row),
+            .pixel_column(pixel_column),
+            .bullet_flag(bullet2_flag),                             
+            .bullet_color(bullet2), 
+            .burst(tank_hit),          
+            .LocX_reg(LocX_reg_2),       
+            .LocY_reg(LocY_reg_2),
+            .BotInfo_reg(BotInfo_reg_2),
+            .clk(clk_75),
+            .reset(~rstn_75),
+            .biu(IO_Bullet[1]),                 //input signal to make the green tank shot
+            .icon_op(icon2),                    //opponent tank icon flag(red tank)
+            .world_pixel(doutb)
+     );*/
 
     // colorizer
     colorizer_v2 colorizer_v2(
-        .icon1(icon1),
-        //.icon1_flag(icon1_flag),
-        .icon2(icon2),
-        //.icon2_flag(icon2_flag),
+        .clk(clk_75),
+        .pixel_column(pixel_column),
+        .pixel_row(pixel_row), 
+        .icon1(icon1),                      // tank color
+        .icon1_flag(icon1_flag),            // tank flag
+        .icon2(icon2),                      // train color
+        .icon2_flag(icon2_flag),            // train flag
+        .bullet1(bullet1),                  // tank bullet color
+        .bullet1_flag(bullet1_flag),        // tank bullet flag
+        .bullet2(bullet2),                  // train bullet color
+        .bullet2_flag(bullet2_flag),        // train bullet flag
+        .frame1(IO_Frame[0]),               // start screen
+        .frame2(IO_Frame[1]),               // map1 screen
+        .frame3(IO_Frame[2]),               // map2 screen
+        .frame4(IO_Frame[3]),               // tank win screen
+        .frame5(IO_Frame[4]),               // train win screen
+        .sw(debounced_SW[4:0]),
         .world_pixel(map_pixel),
         .video_on(video_on),
         .VGA_R(VGA_R),
         .VGA_G(VGA_G),
         .VGA_B(VGA_B)
     );
-    
-//    bullet bullet_tank(
-//            .pixel_row(pixel_row),
-//            .pixel_column(pixel_column),
-//            .bullet(bul2),                        //bullet flag
-//            .bul_color(bul_color2),               //12-bit bullet color (RGB code)
-//            .burst(burst_tg),                     //red tank hits green tank
-//            .LocX_reg(LocX_reg),
-//            .LocY_reg(LocY_reg),
-//            .BotInfo_reg(BotInfo_reg),
-//            .clock(clk_75),
-//            .reset(rstn_75),
-//            .biu(IO_Bullet[1]),                   //input signal to make the green tank shot
-//            .icon_op(icon),                       //opponent tank icon flag(green tank)
-//            .world_pixel(map_pixel)
-//            );
     
     // ****************************************
     // LOGIC
@@ -327,8 +358,10 @@ module rojobot_controller(
         end        
         else if ( wb_cyc_i & wb_stb_i & wb_we_i & !wb_ack_o & wb_sel_i[0]) begin // Possibly wb_ck_o instead.            
             case (wb_adr_i[7:0])                
-                8'h10: IO_BotCtrl <= wb_dat_i[7:0]; //bot control
-                8'h18: IO_INT_ACK  <= wb_dat_i[0];  // int ack          
+                8'h10: IO_BotCtrl <= wb_dat_i[7:0];  //bot control
+                8'h18: IO_INT_ACK  <= wb_dat_i[0];  // int ack
+                8'h20: IO_Bullet <= wb_dat_i[1:0];
+                8'h30: IO_Frame <= wb_dat_i[3:0];
             endcase        
         end    
     end
@@ -356,6 +389,7 @@ module rojobot_controller(
             case (wb_adr_i[7:0])                
                 8'h0C: wb_dat_o <= IO_BotInfo; // bot info                       
                 8'h14: wb_dat_o <= {31'h00_00_00_00, IO_BotUpdt_Sync}; // update sync 
+                8'h20: wb_dat_o <= {30'h00_00_00_00, IO_HIT};  
             endcase        
         end    
     end

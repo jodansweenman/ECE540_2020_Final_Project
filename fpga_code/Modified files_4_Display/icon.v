@@ -1,9 +1,7 @@
-// 
-// 
-//
-// Handle Icon of the Rojobot. This version includes sprites and animation
+//Train Icon module
+//explosion detail added
 
-module icon( //Blue tank
+module icon( // tank
     input [11:0] pixel_column,   //pixel_column signal from dtg module
     input [11:0] pixel_row,      //pixel_row signal from dtg module
     input [7:0] LocX_reg,        //LocX_reg signal from IO_BotInfo
@@ -11,11 +9,11 @@ module icon( //Blue tank
     input [7:0] BotInfo_reg,     //This signal will tell us what the orientation of rojobot.
     input clk,
     input reset,
-    input hit,                  //hit signal shows the tank is hit
+    input hit,                  //hit signal shows the  tank is hit
     output reg [1:0] icon,      //icon signal is a icon flag to determine whether display the icon up
     output reg [11:0]icon_c,    //icon_c signal is 12-bit icon color (RGB CODE)
-    output reg burst,           //burst signal is to show whether the  tank is hit and burst for a while
-    output reg tank_reset      //tank_reset is used to reset the tank rojobot to make it go back the initialization position     
+    output reg burst,           //burst signal is to show whether the tank is hit and burst for a while
+    output reg tank_reset      //tank_reset is used to reset the  tank rojobot to make it go back the initialization position     
     ); 
     wire [11:0] col,row;        
     assign col = LocX_reg << 3;  //Translate rojobot map 128 * 128 to the dgt size 1024 * 768 
@@ -29,8 +27,10 @@ module icon( //Blue tank
     wire [1:0] image_rom ;        //2-bit rom used to store the pixel data of tank icon 
     
     reg [9:0] addr;               //address for read rom
-
-  
+ 
+   
+    //Instantiate burst icon rom and read out the 12-bit burst icon color (RGB CODE)
+    blk_mem_gen_4  boom_ROM2 ( .clka(clock), .ena(burst), .addra(addr), .douta(image_boom_rom));
     //Instantiate tank icon rom and read out the 2-bit tank icon color
     blk_mem_gen_3 blue_tank ( .clka(clk), .ena(~burst), .addra(addr), .douta(image_rom));
     reg [11:0] image_color_rom ;  //12-bit color code for tank icon(RGB CODE)
@@ -44,15 +44,15 @@ module icon( //Blue tank
     endcase
     end
     
-    //get the burst signal which is the hit signal with delay and green_reset which should be set after the blue tank completes burst.
+    //get the burst signal which is the hit signal with delay and tank_reset which should be set after the  tank completes burst.
     always @(posedge clk) begin
     if (!reset)begin
     burst <= 1'b0;                                              //After reset, burst signal is 0
     counter <= 1'b0;                                            
-    tank_reset <= 1'b0;                                        //After reset, green_reset signal is 0
+    tank_reset <= 1'b0;                                        //After reset, tank_reset signal is 0
     end
     else if (hit) begin
-    burst <= 1'b1;                                              //When the tank is hit, the burst signal sets
+    burst <= 1'b1;                                              //When the  tank is hit, the burst signal sets
     counter <= 1'b0;                                            //Counter signal should begin to count
     end
     else if ((counter==32'h2FFFFFF)&&(burst==1'b1))begin        //When the tank bursts for a while 

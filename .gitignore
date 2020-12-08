@@ -5,7 +5,7 @@
 *.sim/
 *.vcd
 !*.bit
-!*.xpr
+*.xpr
 *.log
 *.jou
 *.str
@@ -26,3 +26,11 @@
 *.lpr
 *.rtd
 *.wdf
+*.vhdl
+*.vhd
+*.xdc
+*.xci
+*.txt
+*.veo
+*.vho
+*.jou

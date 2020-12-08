@@ -138,8 +138,8 @@ always @(posedge clk or posedge reset) begin
 		BotInfo_int <= 0;
 		Sensors_int <= 0;
 		
-		MapX <= 0;
-		MapY <= 0;
+		MapX <= START_LOCATION_X;
+		MapY <= START_LOCATION_Y;
 		
 		load_sys_regs <= 0;
 		upd_sysregs <= 0;

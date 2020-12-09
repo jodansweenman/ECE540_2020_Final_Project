@@ -1,6 +1,10 @@
 `timescale 1ns / 1ps
 
-module icon( 
+module icon #(
+    // If 0 instantiate tank, if 1 then train...
+    // ... Only really about which sprite is used
+    TRAIN1_TANK0 = 0
+    )( 
     input wire [11:0] pixel_column,   
     input wire [11:0] pixel_row,      
     input wire [7:0] LocX_reg,       
@@ -19,6 +23,7 @@ module icon(
     assign col = LocX_reg * 8;  
     assign row = LocY_reg * 6;    
 
+// says tank_N but is tank or train depending on parameter
     wire [11:0] tank_N;   
     wire [11:0] tank_E;  
     wire [11:0] tank_S;  
@@ -33,31 +38,63 @@ module icon(
        .addra(read_addr),
        .douta(boom)
     );
-    
-    Tank_N mytank_N(
-       .clka(clk),
-       .ena(~burst),
-       .addra(read_addr),
-       .douta(tank_N)
-    );
-    Tank_E mytank_E(
-       .clka(clk),
-       .ena(~burst),
-       .addra(read_addr),
-       .douta(tank_E)
-    );
-    Tank_S mytank_S(
-       .clka(clk),
-       .ena(~burst),
-       .addra(read_addr),
-       .douta(tank_S)
-    );
-    Tank_W mytank_W(
-       .clka(clk),
-       .ena(~burst),
-       .addra(read_addr),
-       .douta(tank_W)
-    );
+
+    // Generate art for tank/train
+    // 0=Tank, 1=Train
+    generate
+        if (TRAIN1_TANK0 == 0) begin
+            Tank_N mytank_N(
+            .clka(clk),
+            .ena(~burst),
+            .addra(read_addr),
+            .douta(tank_N)
+            );
+            Tank_E mytank_E(
+            .clka(clk),
+            .ena(~burst),
+            .addra(read_addr),
+            .douta(tank_E)
+            );
+            Tank_S mytank_S(
+            .clka(clk),
+            .ena(~burst),
+            .addra(read_addr),
+            .douta(tank_S)
+            );
+            Tank_W mytank_W(
+            .clka(clk),
+            .ena(~burst),
+            .addra(read_addr),
+            .douta(tank_W)
+            );
+        end
+        if (TRAIN1_TANK0 == 1) begin
+            Train_N mytrain_N(
+            .clka(clk),
+            .ena(~burst),
+            .addra(read_addr),
+            .douta(tank_N)
+            );
+            Train_E mytrain_E(
+            .clka(clk),
+            .ena(~burst),
+            .addra(read_addr),
+            .douta(tank_E)
+            );
+            Train_S mytrain_S(
+            .clka(clk),
+            .ena(~burst),
+            .addra(read_addr),
+            .douta(tank_S)
+            );
+            Train_W mytrain_W(
+            .clka(clk),
+            .ena(~burst),
+            .addra(read_addr),
+            .douta(tank_W)
+            );
+        end
+    endgenerate
 
     always @(posedge clk) begin
         if (!reset)begin

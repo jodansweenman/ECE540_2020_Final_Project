@@ -242,7 +242,7 @@ module rojobot_controller(
     
     // X/Y set in bot IP
     // Parameter pass for train sprite
-    icon #(TRAIN1_TANK0(1)) icon_train(
+    icon #(.TRAIN1_TANK0(1)) icon_train(
         .clk(clk_75),
         .reset(~rstn_75),
         .pixel_row(pixel_row),

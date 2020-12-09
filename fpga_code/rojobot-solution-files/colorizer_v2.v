@@ -11,10 +11,9 @@ module colorizer_v2(
     input             bullet1_flag,             // tank bullet flag
     input             bullet2_flag,             // train bullet flag
     input             frame1,                   // initial screen
-    input             frame2,                   // map1 
-    input             frame3,                   // map2 
-    input             frame4,                   // tank win
-    input             frame5,                   // train win
+    input             frame2,                   // map
+    input             frame3,                   // tank win
+    input             frame4,                   // train win
     //input wire [4:0]  sw,                       // for testing purpose
     input [1:0]       world_pixel,
     input             video_on,
@@ -29,8 +28,8 @@ module colorizer_v2(
       wire [11:0] player1;
       wire [11:0] player2;
       GameScreen Initial_begin (.clka(clk), .ena(frame1), .addra(addr), .douta(Initial));         //Initial Frame rom
-      TankWin player1_win (.clka(clk), .ena(frame4), .addra(addr), .douta(player1));              //player1 win
-      TrainWin player2_win (.clka(clk), .ena(frame5), .addra(addr), .douta(player2));             //player2 win
+      TankWin player1_win (.clka(clk), .ena(frame3), .addra(addr), .douta(player1));              //player1 win
+      TrainWin player2_win (.clka(clk), .ena(frame4), .addra(addr), .douta(player2));             //player2 win
    
  always @ (posedge clk)  begin
 	if (video_on == 1'b0)                   //if the video is off, nothing will be shown
@@ -42,7 +41,7 @@ module colorizer_v2(
 		addr <= {addr_r,addr_c};		
 		{VGA_R, VGA_G, VGA_B} <= Initial;	
 	end
-	else if (frame2==1'b1 || frame3==1'b1)      // game screen
+	else if (frame2==1'b1)      // game screen
           begin       
             case({world_pixel,icon1_flag,icon2_flag,bullet1_flag,bullet2_flag})                //case statement start
             6'b001000: {VGA_R, VGA_G, VGA_B} <= icon1;  
@@ -88,14 +87,14 @@ module colorizer_v2(
           endcase
 	end
 
-	else if ((frame4 == 1'b1))begin        // tank win screen
+	else if ((frame3 == 1'b1))begin        // tank win screen
 		addr_r <= pixel_row/3'd3;          // scaling 256*256 pixels
 		addr_c <= pixel_column/3'd4;
 		addr <= {addr_r,addr_c};		
 		{VGA_R, VGA_G, VGA_B} <= player1;
 	    end
 
-	else if (frame5 == 1'b1) begin          // train win screen
+	else if (frame4 == 1'b1) begin          // train win screen
          addr_r <= pixel_row/3'd3;          // scaling 256*256 pixels
 		 addr_c <= pixel_column/3'd4;
 		 addr <= {addr_r,addr_c};	  

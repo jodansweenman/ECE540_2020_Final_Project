@@ -89,12 +89,12 @@ module icon2(
    always @ (posedge clk) begin
         if(read_addr == 255) 
             read_addr <= 8'd0;
-        else if ((pixel_row >= row-60 && pixel_row < (row-60+WIDTH)) && (pixel_column >= col && pixel_column < (col+WIDTH)))
+        else if ((pixel_row >= row && pixel_row < (row+WIDTH)) && (pixel_column >= col && pixel_column < (col+WIDTH)))
             read_addr <= read_addr+1'd1;
    end
       
    always @ (posedge clk) begin
-     if ((pixel_row >= row-60 && pixel_row < (row-60+WIDTH)) && (pixel_column >= col && pixel_column < (col+WIDTH))) begin
+     if ((pixel_row >= row && pixel_row < (row+WIDTH)) && (pixel_column >= col && pixel_column < (col+WIDTH))) begin
            case(BotInfo_reg[2:0])
               3'b000: begin
                       icon <= burst ? boom : train_N;

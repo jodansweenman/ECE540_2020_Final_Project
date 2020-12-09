@@ -137,7 +137,8 @@ module rojobot_controller(
     );
     
     // rojobot 2
-    rojobot31_1 Train (
+    // Parameterized to start off center (map relative coordinates)
+    rojobot31_1 #(TOP_START_LOCATION_X = -61, TOP_START_LOCATION_Y = 0) Train (
         .MotCtl_in(MotCtl_in_75_2),         // input wire [7 : 0] MotCtl_in
         .LocX_reg(LocX_reg_2),              // output wire [7 : 0] LocX_reg
         .LocY_reg(LocY_reg_2),              // output wire [7 : 0] LocY_reg
@@ -208,7 +209,7 @@ module rojobot_controller(
         .doutb()
     );
     
-    // mux to select map based on the SW
+    // mux to select map based on the IO signal
     assign {map_data_tank, map_data_train, map_pixel} =
         debounced_SW[15] ? {map1_data_tank, map1_data_train, map1_pixel} : {map2_data_tank, map2_data_train, map2_pixel};
 
@@ -238,7 +239,9 @@ module rojobot_controller(
         .tank_reset(tank_reset_hit)
     );
     
-    icon2 icon_train(
+    
+    // X/Y set in bot IP
+    icon icon_train(
         .clk(clk_75),
         .reset(~rstn_75),
         .pixel_row(pixel_row),
@@ -253,7 +256,7 @@ module rojobot_controller(
         .train_reset(train_reset_hit)
     );
 
-    /*bullet tank_bullet(    
+    bullet tank_bullet(    
             .pixel_row(pixel_row),
             .pixel_column(pixel_column),
             .bullet_flag(bullet1_flag),                             
@@ -283,7 +286,7 @@ module rojobot_controller(
             .biu(IO_Bullet[1]),                 //input signal to make the green tank shot
             .icon_op(icon2),                    //opponent tank icon flag(red tank)
             .world_pixel(doutb)
-     );*/
+     );
 
     // colorizer
     colorizer_v2 colorizer_v2(
@@ -303,7 +306,7 @@ module rojobot_controller(
         .frame3(IO_Frame[2]),               // map2 screen
         .frame4(IO_Frame[3]),               // tank win screen
         .frame5(IO_Frame[4]),               // train win screen
-        .sw(debounced_SW[4:0]),
+        //.sw(debounced_SW[4:0]),
         .world_pixel(map_pixel),
         .video_on(video_on),
         .VGA_R(VGA_R),

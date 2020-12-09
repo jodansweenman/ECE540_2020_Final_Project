@@ -253,8 +253,8 @@ module rojobot_controller(
         .icon(icon2),
         .burst(IO_HIT[1]),
         .icon_flag(icon2_flag),
-        .train_hit(train_hit),
-        .train_reset(train_reset_hit)
+        .tank_hit(train_hit),
+        .tank_reset(train_reset_hit)
     );
 
     bullet tank_bullet(    

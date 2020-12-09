@@ -27,54 +27,9 @@
  * Keyboard_k          - used to make tank2 go down
  * Keyboard_j          - used to make tank2 go left
  * Keyboard_l          - used to make tank2 go right
- * Keyboard_q          - used to make tank1 shot bullet
- * Keyboard_u          - used to make tank2 shot bullet
  *
- * and then give the data back to register
- *
- * PORT_BOTCTRL        - used to control tank1 movement
- * PORT_BOTCTRL_1      - used to control tank1 movement
- * PORT_BULLET         - used to control both tank shotting, 0x01 for tank1, 0x02 for tank2
- *
- * and it is used to control jump to different screen
- * Keyboard_enter      - used to jump screens
- *
- *Moveover, it will read data from register
- *
- *PORT_HIT - used to show which tank is hit and which tank's base is hit.
- * 	         PORT_HIT[3] - red tank base is hit.  PORT_HIT[2] - red tank is hit.
- *           PORT_HIT[1] - green tank base is hit.  PORT_HIT[0] - green tank is hit.
- *
- * to count how may tank is hit, check base is hit or not and then detect which tank is win.
- *
- *Also it will give register
- *PORT_FRAME - used to control which screen should be displayed
- *PORT_HISTORY - used to control which tank should be shown in history screen
- * 	         PORT_HISTORY[5:4] - third game history.
- *           PORT_HISTORY[3:2] - second game history.
- *           PORT_HISTORY[1:0] - first game history.
- *
- *by using
- *
- * Screen_loading		- value to display loading screen
- * Screen_play			- value to display play screen
- * Screen_green_win		- value to display green_win screen
- * Screen_red_win		- value to display red_win screen
- * Screen_history		- value to display history screen
  */
 # value of each key of the keyboard
-; Keyboard_w          = 0x1d
-; Keyboard_s          = 0x1b
-; Keyboard_a          = 0x1c
-; Keyboard_d          = 0x23
-; Keyboard_i          = 0x43
-; Keyboard_k          = 0x42
-; Keyboard_j          = 0x3b
-; Keyboard_l          = 0x4b
-; Keyboard_q          = 0x15
-; Keyboard_u          = 0x3c
-; Keyboard_enter      = 0x5a
-
 Keyboard_w          = 0x1d
 Keyboard_s          = 0x1b
 Keyboard_a          = 0x1c
@@ -83,11 +38,6 @@ Keyboard_i          = 0x43
 Keyboard_k          = 0x42
 Keyboard_j          = 0x3b
 Keyboard_l          = 0x4b
-# Keyboard_leftshift  = 0x12
-# Keyboard_rightshift = 0x59
-# Keyboard_1          = 0x16
-# Keyboard_2          = 0x1e
-# Keyboard_space      = 0x29
 MSKORIENT           = 0x07
 
 # ======================
@@ -108,20 +58,6 @@ PORT_BOTCTRL_1		= 0x80001910		# (o) Bot Control port
 PORT_BOTUPDT_1		= 0x80001914		# (i) Bot Update port (Poll)
 PORT_INTACK_1		= 0x80001918		# (o) Bot Int Ack
 
-# PORT_HIT			= 0x8000210c		# (i) Detecting which tank or base is hit port
-# PORT_FRAME 			= 0x80002110		# (o) Screen Control port
-# PORT_HISTORY		= 0x80002114 		# (o) Tank display control port for histroy screen
-# PORT_BULLET			= 0x80002118		# (o) Shot bullet Control port
-
-# Value to screen control port to display each screen
-# Screen_loading		= 0x01
-# Screen_play			= 0x02
-# Screen_green_win	= 0x04
-# Screen_red_win		= 0x08
-# Screen_history		= 0x10
-
-
-
 .text
 .globl main
 main:
@@ -130,8 +66,6 @@ main_1:
                 beq   zero, zero, Players_control	# check user input to control tank movement
 				jal     loop
 				nop
-Check_Hitted:
-				beq   zero, zero, GREEN_HITTED		# check either tank or base is hit
 loop:
 				beq   zero,zero,main_1				#	} end of the loop
 

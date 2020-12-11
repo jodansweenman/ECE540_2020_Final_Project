@@ -138,7 +138,7 @@ module rojobot_controller(
     
     // rojobot 2
     // Parameterized to start off center (map relative coordinates)
-    rojobot31_1 #(.TOP_START_LOCATION_X(-61), .TOP_START_LOCATION_Y(0)) Train (
+    rojobot31_1 Train (
         .MotCtl_in(MotCtl_in_75_2),         // input wire [7 : 0] MotCtl_in
         .LocX_reg(LocX_reg_2),              // output wire [7 : 0] LocX_reg
         .LocY_reg(LocY_reg_2),              // output wire [7 : 0] LocY_reg
